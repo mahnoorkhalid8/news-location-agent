@@ -1,5 +1,5 @@
 import os
-from agents import Agent, Runner, AsyncOpenAI, OpenAIChatCompletionsModel,function_tool, set_tracing_disabled
+from agents import Agent, Runner, AsyncOpenAI, OpenAIChatCompletionsModel,function_tool
 from agents.run import RunConfig
 import asyncio
 from dotenv import load_dotenv
@@ -7,8 +7,8 @@ import requests
 import rich
 
 load_dotenv()
-set_tracing_disabled(True)
 
+openai_api_key = os.getenv("OPENAI_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 if not gemini_api_key:
@@ -27,7 +27,6 @@ model = OpenAIChatCompletionsModel(
 config = RunConfig(
     model_provider=external_client,
     model=model,
-    tracing_disabled=True
 )
 
 @function_tool
@@ -74,7 +73,10 @@ plant_agent = Agent(
 
 news_location_agent = Agent(
     name="NewsLocationAgent",
-    instructions="You specialize in giving the user's current location and the latest breaking news, and can also answer questions about plant biology briefly.",
+    instructions=(
+        "You specialize in giving the user's current location and the latest breaking news.\n "
+        "You can also answer questions about plant biology (answer the question in just 4-5 lines) by handingoff the task to plantAgent."
+    ),
     model=model,
     tools=[get_current_location, get_breaking_news],
     handoffs=[plant_agent]
